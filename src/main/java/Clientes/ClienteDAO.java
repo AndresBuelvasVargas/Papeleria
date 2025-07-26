@@ -23,7 +23,7 @@ public class ClienteDAO {
         try{
            // consulta inserccion de registro en la base de datos
            conn = Conexion_Dao.ObtenerConexion();
-           String sql = "INSERT INTO estudiantes(Nombre,Direccion,Telefono,Email) VALUES(?,?,?,?)";
+           String sql = "INSERT INTO Cliente(Nombre,Direccion,Telefono,Email) VALUES(?,?,?,?)";
            stmt = conn.prepareStatement(sql);
            stmt.setString(1, Nombre);
            stmt.setString(2, Direccion);
@@ -32,7 +32,7 @@ public class ClienteDAO {
            stmt.executeUpdate();
            
           }catch(Exception e){
-              System.out.println("Error al insertar estudiante"+e.getMessage());
+              System.out.println("Error al insertar cliente"+e.getMessage());
               e.printStackTrace();
           }finally{
                    Conexion_Dao.CerrarConexion(conn);
@@ -40,59 +40,45 @@ public class ClienteDAO {
         
         
     }
-    // creamos una función tipo publica la cual nos permite actualizar los datos de los estudiantes
-    public void ActualizarCliente(int ClienteID, String Nombre, String Direccion, String Telefono, String Email){
-     Connection conn = null;
-     PreparedStatement stmt = null;
-     try{
-         // para conectarnos a nuestra base de datos con la función obtenerConexion
-        conn = Conexion_Dao.ObtenerConexion();
-        // Realizamos la consulta a nuestra base de datos
-        String sql ="update Cliente set Nombre =?, Direccion=?, Telefono=?, Email=? WHERE ClienteID=?";
-        stmt = conn.prepareStatement(sql);
-        stmt.setString(1, Nombre);
-        stmt.setString(2, Direccion);
-        stmt.setString(3, Telefono);
-        stmt.setString(4, Email);
-        stmt.setInt(5, ClienteID);
-        stmt.executeUpdate();
-        
-     }catch(Exception e){
-          System.out.println("Error al actualizar registro de estudiante"+e.getMessage());
-              e.printStackTrace();
-     }finally{
-                   Conexion_Dao.CerrarConexion(conn);
-                  }
-    }
-    // Listar Estudiantes
-    public List<Cliente> ListarClientes(){
-    List<Cliente> Cliente = new ArrayList<>();
-    Connection conn= null;
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
-    try{
-        conn = Conexion_Dao.ObtenerConexion();
-        String sql ="SELECT * FROM estudiantes;";
-        stmt = conn.prepareStatement(sql);
-        rs = stmt.executeQuery();
-        while(rs.next()){
-        Cliente Client = new Cliente();
-        Client.setClienteID(rs.getInt("ClienteID"));
-        Client.setNombre(rs.getString("Nombre"));
-        Client.setDireccion(rs.getString("Direccion"));
-        Client.setTelefono(rs.getString("Telefono"));
-        Client.setEmail(rs.getString("Email"));
-        Cliente.add(Client);
+    // creamos una función tipo publica la cual nos permite actualizar los datos de los clientes
+    public void ActualizarCliente(Cliente cliente) {
+        try (Connection conn = Conexion_Dao.ObtenerConexion()) {
+            String sql = "UPDATE Cliente SET Nombre=?, Direccion=?, Telefono=?, Email=? WHERE ClienteID=?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, cliente.getNombre());
+            stmt.setString(2, cliente.getDireccion());
+            stmt.setString(3, cliente.getTelefono());
+            stmt.setString(4, cliente.getEmail());
+            stmt.setInt(5, cliente.getClienteID());
+            stmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-    }catch(Exception e){
-      e.printStackTrace();
-    }finally{
-        Conexion_Dao.CerrarConexion(conn);
-        
     }
-        return Cliente;
-        
-    }
+    // Listar Clientes
+
+    public List<Cliente> ListarClientes() {
+        List<Cliente> lista = new ArrayList<>();
+        String sql = "SELECT * FROM cliente;";
+
+        try {
+            Connection con = Conexion_Dao.ObtenerConexion(); // usa tu clase de conexión
+            PreparedStatement ps = con.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Cliente c = new Cliente();
+                c.setClienteID(rs.getInt("ClienteID"));
+                c.setNombre(rs.getString("Nombre"));
+                c.setDireccion(rs.getString("Direccion"));
+                c.setTelefono(rs.getString("Telefono"));
+                c.setEmail(rs.getString("Email"));
+                lista.add(c);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return lista;
+}
 // Funcion para obtenerEstudiantesPorId el cual nos permite actualizar los datos de los estudiantes 
   public Cliente obtenerClientePorId(int id){
     Connection conn = null;
@@ -114,11 +100,11 @@ public class ClienteDAO {
             Client.setNombre(rs.getString("Nombre"));
             Client.setDireccion(rs.getString("Direccion"));
             Client.setTelefono(rs.getString("Telefono"));
-            Client.setDireccion(rs.getString("Email"));
+            Client.setEmail(rs.getString("Email"));
         }
 
     }catch(Exception e){
-        System.out.println("Error al obtener estudiante por ID: " + e.getMessage());
+        System.out.println("Error al obtener Cliente por ID: " + e.getMessage());
         e.printStackTrace();
     }finally{
         Conexion_Dao.CerrarConexion(conn);
@@ -144,20 +130,20 @@ public class ClienteDAO {
            total = rs.getInt(1);
        }
    }catch(Exception e ){
-       System.out.println("Error al contar estudiantes" +e.getMessage());
+       System.out.println("Error al contar Clientes" +e.getMessage());
    }finally{
      Conexion_Dao.CerrarConexion(conn);
    }
    return total;
   }
-  public void eliminarDatosCliente(int id){
+  public void eliminarDatosCliente(int ID){
    Connection conn = null;
    PreparedStatement stmt = null;
    try{ 
        conn = Conexion_Dao.ObtenerConexion();
        String sql = "DELETE FROM Cliente WHERE ClienteID=?";
        stmt = conn.prepareStatement(sql);
-       stmt.setInt(1,id);
+       stmt.setInt(1,ID);
        stmt.executeUpdate();
       
    }catch(Exception e){

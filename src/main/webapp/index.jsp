@@ -1,9 +1,3 @@
-<%-- 
-    Document   : index
-    Created on : 24/07/2025, 9:40:50 p. m.
-    Author     : SAMI
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
@@ -23,7 +17,7 @@
                             <h2><b>SISTEMA DE INFORMACIÓN DE PAPELERÍA</b></h2>
                             <hr>
                             <div class="d-grid gap-2">
-                                <a href="Cliente?accion=mostrar" class="btn btn-custom btn-estudiante" target="_blank">Gestión de Clientes</a>
+                                <a href="ServletCliente?accion=listar" class="btn btn-custom btn-estudiante">Gestión de Clientes</a>
                                 <a href="#" class="btn btn-custom btn-materia">Gestión de Productos</a>
                                 <a href="#" class="btn btn-custom btn-docente">Gestión de Proveedores</a>
                                 <a href="#" class="btn btn-custom btn-programa">Gestión de Ventas</a>
@@ -33,13 +27,6 @@
                 </div>
             </div>
         </div>
-        <form action="Cliente" method="POST">
-            <p><label>Nombre</label> <input type="text" name="Nombre"></p>
-            <p><label>Telefono</label> <input type="number" name="Telefono"></p>
-            <p><label>Direccion</label> <input type="text" name="Direccion"></p>
-            <button type="submit" > Enviar </button>
-        </form>
-        
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>

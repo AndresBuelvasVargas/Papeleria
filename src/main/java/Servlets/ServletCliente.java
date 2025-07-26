@@ -15,8 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 
-
-@WebServlet(name = "ServletEstudiantes", urlPatterns = {"/ServletEstudiantes"})
+@WebServlet(name = "ServletCliente", urlPatterns = {"/ServletCliente"})
 public class ServletCliente extends HttpServlet {
 
     /**
@@ -29,8 +28,9 @@ public class ServletCliente extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     public void guardarCliente(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException{
+            throws ServletException, IOException {
         String Nombre = request.getParameter("Nombre");
+        System.out.println(Nombre);
         String Direccion = request.getParameter("Direccion");
         String Telefono = request.getParameter("Telefono");
         String Email = request.getParameter("Email");
@@ -46,29 +46,47 @@ public class ServletCliente extends HttpServlet {
         String Direccion = request.getParameter("Direccion");
         String Telefono = request.getParameter("Telefono");
         String Email = request.getParameter("Email");
-        ClienteDAO estudianteDao = new ClienteDAO();
-        estudianteDao.ActualizarCliente(ClienteID, Nombre, Direccion, Telefono, Email);
-        response.sendRedirect("ServletEstudiantes?action=mostrar");
+
+        Cliente cliente = new Cliente(ClienteID, Nombre, Direccion, Telefono, Email);
+        ClienteDAO clienteDao = new ClienteDAO();
+        clienteDao.ActualizarCliente(cliente); // <- pasamos un objeto Cliente
+
+        response.sendRedirect("ServletCliente?accion=listar");
     }
-     public void mostrarEstudiantesModificar(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException{
+
+    public void mostrarCliente(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        ClienteDAO clienteDao = new ClienteDAO();
+        List<Cliente> lista = clienteDao.ListarClientes();
+        request.setAttribute("clientes", lista);
+        request.getRequestDispatcher("lista_clientes.jsp").forward(request, response);
+    }
+
+//    public void mostrarEstudiantes(HttpServletRequest request, HttpServletResponse response)
+//            throws ServletException, IOException {
+//        ClienteDAO clienteDao = new ClienteDAO();
+//        List<Cliente> Clientes = clienteDao.ListarClientes();
+//        request.setAttribute("listadestudiantes", Clientes);
+//        request.getRequestDispatcher("index.jsp").forward(request, response);
+//        mostrarEstudiantesModificar(request, response);
+
+ //   }
+
+    public void eliminarCliente(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            int ClienteID = Integer.parseInt(request.getParameter("ClienteID"));
+            System.out.println("Eliminando cliente con ID: " + ClienteID);
+
             ClienteDAO clienteDao = new ClienteDAO();
-            List<Cliente> Clientes = clienteDao.ListarClientes();
-            request.setAttribute("listadestudiantes",Clientes);
-            request.getRequestDispatcher("ModificarClientes.jsp").forward(request, response);
-     }
-      public void mostrarEstudiantes(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException{
-            ClienteDAO clienteDao = new ClienteDAO();
-            List<Cliente> Clientes = clienteDao.ListarClientes();
-            request.setAttribute("listadestudiantes",Clientes);
-            request.getRequestDispatcher("index.jsp").forward(request, response);
-            mostrarEstudiantesModificar(request,response);
-            
-     }
+            clienteDao.eliminarDatosCliente(ClienteID);
 
-
-
+            response.sendRedirect("ServletCliente?accion=listar");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.getWriter().println("Error al eliminar: " + e.getMessage());
+        }
+    }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
@@ -82,19 +100,27 @@ public class ServletCliente extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String action = request.getParameter("action");
-        if("mostrar".equals(action)){
-            // mostrar total de estudiantes
-            mostrarEstudiantes(request,response);
-        }else if("modificar".equals(action)){
-            // Mostrar el formulario con los datos del estudiante teniendo como filtro el ID
-            int ClienteID = Integer.parseInt(request.getParameter("ClienteID"));
-            ClienteDAO ClienteDao = new ClienteDAO();
-            Cliente cliente =ClienteDao.obtenerClientePorId(ClienteID);
-            request.setAttribute("Cliente",cliente);
-            request.getRequestDispatcher("ModificarCliente.jsp").forward(request, response);
+
+        String accion = request.getParameter("accion");
+
+        if ("eliminar".equals(accion)) {
+            eliminarCliente(request, response); // Aquí ya se hace el redirect. No continuar.
+            return; // IMPORTANTE: detener aquí
         }
 
+        if ("listar".equals(accion)) {
+            ClienteDAO dao = new ClienteDAO();
+            List<Cliente> lista = dao.ListarClientes();
+            request.setAttribute("clientes", lista);
+            request.getRequestDispatcher("lista_clientes.jsp").forward(request, response);
+        }
+        
+        if ("editar".equals(accion)) {
+            int id = Integer.parseInt(request.getParameter("ClienteID"));
+            Cliente cliente = new ClienteDAO().obtenerClientePorId(id); 
+            request.setAttribute("cliente", cliente);
+            request.getRequestDispatcher("editar_cliente.jsp").forward(request, response);
+        }
     }
 
     /**
@@ -108,11 +134,21 @@ public class ServletCliente extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-       String action = request.getParameter("action");
-        if("guardar".equals(action)){
-          guardarCliente(request,response);
-        }else if("actualizar".equals(action)){
-            ActualizarCliente(request,response); 
+        String accion = request.getParameter("accion");
+        if ("guardar".equals(accion)) {
+            guardarCliente(request, response);
+        }
+        if ("actualizar".equals(accion)) {
+            int ClienteID = Integer.parseInt(request.getParameter("ClienteID"));
+            String Nombre = request.getParameter("nombre");
+            String Direccion = request.getParameter("direccion");
+            String Telefono = request.getParameter("telefono");
+            String Email = request.getParameter("email");
+
+            Cliente c = new Cliente(ClienteID, Nombre, Direccion, Telefono, Email);
+            new ClienteDAO().ActualizarCliente(c);
+
+            response.sendRedirect("ServletCliente?accion=listar");
         }
 
     }
